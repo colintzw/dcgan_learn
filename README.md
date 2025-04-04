@@ -34,5 +34,12 @@ The Conv layers should be the ConvTranspose2d pytorch function which expands the
 Following the ReLU paragraph, for Conv1 - Conv3, we use
 BatchNorm + ReLU (in that sequence) and for Conv4, we use BatchNorm Tanh
 
+## Learnings after trying to implement it
+- You can move stuff layer by layer to different devices.
+- use `self.to(device)` to move the entire model to the desired device.
+- there is a sneaky part to initialize all model weights to a normal distribution at the start of training. 
+- last layer has no batch norm.. almost missed that.
 
+# Discriminator
+Now is the detective work. what do we want to do? 
 
