@@ -1,7 +1,7 @@
 from torch import nn
 
 
-class DCGan_Generator(nn.Module):
+class Generator(nn.Module):
     LATENT_DIM = 100
     CONV1_INPUT_SIZE = 4
     CONV1_INPUT_CHANNELS = 1024
