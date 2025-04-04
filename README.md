@@ -18,7 +18,7 @@ The network architecture is not super well described, but here seems to be the b
 > Third is Batch Normalization (Ioffe & Szegedy, 2015) which stabilizes learning by normalizing the input to each unit to have zero mean and unit variance. This helps deal with training problems that arise due to poor initialization and helps gradient flow in deeper models. This proved critical to get deep generators to begin learning, preventing the generator from collapsing all samples to a single point which is a common failure mode observed in GANs. Directly applying batchnorm to all layers however, resulted in sample oscillation and model instability. This was avoided by not applying batchnorm to the generator output layer and the discriminator input layer.
 >
 > The ReLU activation (Nair & Hinton, 2010) is used in the generator with the exception of the output layer which uses the Tanh function. We observed that using a bounded activation allowed the model to learn more quickly to saturate and cover the color space of the training distribution. Within the discriminator we found the leaky rectified activation (Maas et al., 2013) (Xu et al., 2015) to work well, especially for higher resolution modeling. This is in contrast to the original GAN paper, which used the maxout activation (Goodfellow et al., 2013).
-
+<!--  -->
 Using this description, and fig 1 of the paper:
 ![Fig1](dcgan_fig1.png "Figure 1 of 15.11.06434v2")
 
@@ -30,7 +30,7 @@ Lets assume a 100 dim latent dimensional space as per Fig1.
 The first layer seems to be a linear layer that expands that 100 dim into 1024x4x4, with 1024 channels. Given the batch norm paragraph, it seems that batch norm should be inserted here.
 ## Conv layers
 The Conv layers should be the ConvTranspose2d pytorch function which expands the number of dimensions while also decreasing the number of channels. So, for Conv1 we have
-1024 x 4 x 4 -> 512 x 8 x 8 (stride 2, padding 0)
+1024 x 4 x 4 -> 512 x 8 x 8 (stride 2)
 Following the ReLU paragraph, for Conv1 - Conv3, we use
 BatchNorm + ReLU (in that sequence) and for Conv4, we use BatchNorm Tanh
 
@@ -41,5 +41,11 @@ BatchNorm + ReLU (in that sequence) and for Conv4, we use BatchNorm Tanh
 - last layer has no batch norm.. almost missed that.
 
 # Discriminator
-Now is the detective work. what do we want to do? 
+Now is the detective work. what do we want to do? We need to take a 3 channel 64x64 image and output a single float.
+
+## Conv layers
+The Conv layers should be the Conv2d pytorch function with a stride of 2. This should reduce the dim by a factor of 2 each time. Also, other than the first conv layer, all other conv layers should also include a BatchNorm and a LeakyReLU (all layers).
+
+## Final layer.
+The final conv layer should output a 1024 channel 4x4 tensor. We need to reduce this to a single float. We use a Linear + Sigmoid? Lets also add a Flatten in front..  
 
