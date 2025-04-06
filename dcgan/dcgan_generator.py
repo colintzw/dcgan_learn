@@ -1,40 +1,44 @@
+from dcgan_consts import (
+    CONV_GEN_CHANNELS,
+    CONV_GEN_INPUT_SIZE,
+    CONV_KERNEL_SIZE,
+    CONV_PADDING,
+)
 from torch import nn
 
 
 class Generator(nn.Module):
     LATENT_DIM = 100
-    CONV1_INPUT_SIZE = 4
-    CONV1_INPUT_CHANNELS = 1024
 
     def __init__(self, device="mps"):
         super().__init__()
         self.linear = nn.Sequential(
             nn.Linear(
                 in_features=self.LATENT_DIM,
-                out_features=self.CONV1_INPUT_CHANNELS
-                * self.CONV1_INPUT_SIZE
-                * self.CONV1_INPUT_SIZE,
+                out_features=CONV_GEN_CHANNELS[0]
+                * CONV_GEN_INPUT_SIZE
+                * CONV_GEN_INPUT_SIZE,
                 bias=True,  # unsure if this is needed, just add
             )
         )
         conv_layer_parts = (
             self.conv_layer(
-                in_channels=self.CONV1_INPUT_CHANNELS,
-                out_channels=self.CONV1_INPUT_CHANNELS // 2,
+                in_channels=CONV_GEN_CHANNELS[0],
+                out_channels=CONV_GEN_CHANNELS[1],
                 is_final_layer=False,
             )
             + self.conv_layer(
-                in_channels=self.CONV1_INPUT_CHANNELS // 2,
-                out_channels=self.CONV1_INPUT_CHANNELS // 4,
+                in_channels=CONV_GEN_CHANNELS[1],
+                out_channels=CONV_GEN_CHANNELS[2],
                 is_final_layer=False,
             )
             + self.conv_layer(
-                in_channels=self.CONV1_INPUT_CHANNELS // 4,
-                out_channels=self.CONV1_INPUT_CHANNELS // 8,
+                in_channels=CONV_GEN_CHANNELS[2],
+                out_channels=CONV_GEN_CHANNELS[3],
                 is_final_layer=False,
             )
             + self.conv_layer(
-                in_channels=self.CONV1_INPUT_CHANNELS // 8,
+                in_channels=CONV_GEN_CHANNELS[3],
                 out_channels=3,
                 is_final_layer=True,
             )
@@ -57,33 +61,28 @@ class Generator(nn.Module):
         proj_and_reshape = self.linear(z)
         # reshape with view
         proj_and_reshape = proj_and_reshape.view(
-            -1, self.CONV1_INPUT_CHANNELS, self.CONV1_INPUT_SIZE, self.CONV1_INPUT_SIZE
+            -1, CONV_GEN_CHANNELS[0], CONV_GEN_INPUT_SIZE, CONV_GEN_INPUT_SIZE
         )
         # conv blocks
         return self.conv_block(proj_and_reshape)
 
     @staticmethod
     def conv_layer(in_channels, out_channels, is_final_layer: bool = False):
+        conv_transpose = nn.ConvTranspose2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=CONV_KERNEL_SIZE,
+            stride=2,
+            padding=CONV_PADDING,
+        )
         if is_final_layer:
             return [
-                nn.ConvTranspose2d(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=3,
-                    stride=2,
-                    padding=0,
-                ),
+                conv_transpose,
                 nn.Tanh(),
             ]
         else:
             return [
-                nn.ConvTranspose2d(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=3,
-                    stride=2,
-                    padding=0,
-                ),
+                conv_transpose,
                 nn.BatchNorm2d(num_features=out_channels),
                 nn.ReLU(inplace=True),
             ]
