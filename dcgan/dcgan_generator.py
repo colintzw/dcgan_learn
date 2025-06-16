@@ -3,18 +3,18 @@ from dcgan_consts import (
     CONV_GEN_INPUT_SIZE,
     CONV_KERNEL_SIZE,
     CONV_PADDING,
+    LATENT_DIM
 )
 from torch import nn
 
 
 class Generator(nn.Module):
-    LATENT_DIM = 100
 
     def __init__(self, device="mps"):
         super().__init__()
         self.linear = nn.Sequential(
             nn.Linear(
-                in_features=self.LATENT_DIM,
+                in_features=LATENT_DIM,
                 out_features=CONV_GEN_CHANNELS[0]
                 * CONV_GEN_INPUT_SIZE
                 * CONV_GEN_INPUT_SIZE,

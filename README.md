@@ -49,3 +49,6 @@ The Conv layers should be the Conv2d pytorch function with a stride of 2. This s
 ## Final layer.
 The final conv layer should output a 1024 channel 4x4 tensor. We need to reduce this to a single float. We use a Linear + Sigmoid? Lets also add a Flatten in front..  
 
+
+# Training loop.
+The GAN training loop tries to solve a minimax problem 

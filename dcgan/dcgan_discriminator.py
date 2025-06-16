@@ -5,12 +5,12 @@ from dcgan_consts import (
     CONV_GEN_INPUT_SIZE,
     CONV_KERNEL_SIZE,
     CONV_PADDING,
+    LEAKYRELU_SLOPE,
 )
 from torch import nn
 
 
 class Discriminator(nn.Module):
-    IMAGE_SIZE = 64
     DCONV1_INPUT_CHANNELS = 128
 
     def __init__(self, device="mps"):
@@ -48,7 +48,7 @@ class Discriminator(nn.Module):
     def _initialize_weights(self):
         """Used to align with the DCGAN paper of weight initialization"""
         for m in self.modules():  # Iterates through all layers
-            if isinstance(m, (nn.ConvTranspose2d, nn.Linear, nn.BatchNorm2d)):
+            if isinstance(m, (nn.Conv2d, nn.Linear, nn.BatchNorm2d)):
                 nn.init.normal_(m.weight, 0.0, 0.02)  # Main weights
                 if hasattr(m, "bias") and m.bias is not None:
                     # Zero the biases, Don't want this to be crazy big or small.
@@ -72,5 +72,5 @@ class Discriminator(nn.Module):
         if not is_first_layer:
             conv_parts.append(nn.BatchNorm2d(num_features=out_channels))
 
-        conv_parts.append(nn.LeakyReLU(negative_slope=0.2, inplace=False))
+        conv_parts.append(nn.LeakyReLU(negative_slope=LEAKYRELU_SLOPE, inplace=False))
         return conv_parts
